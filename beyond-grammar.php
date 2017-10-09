@@ -2,7 +2,7 @@
 /*
    Plugin Name: BeyondGrammar for WordPress
    Plugin URI:  https://github.com/prowriting/beyondgrammar-wordpress
-   Description: Bring real-time spelling, grammar and style checking into your TinyMCE editor. Perfect for web CMSs, help desk systems and blogs
+   Description: Bring real-time spelling, grammar and style checking into WordPress, the world's most popular content management system.
    Author:      @ProWritingAid
    Version:     0.1
    Author URI:  https://github.com/prowriting/beyondgrammar-wordpress
