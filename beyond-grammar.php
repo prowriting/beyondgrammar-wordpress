@@ -16,6 +16,7 @@ $bg_page = "beyondgrammar";
 
 $bg_opts_apiKey = 'beyondgrammar_apiKey';
 $bg_input_apiKey = "{$bg_optionName}[{$bg_opts_apiKey}]";
+$bg_version = "1.0.18";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Entry Point  //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +51,7 @@ function bg_PatchEditor(){
 * Adding settings to the BeyondGrammar options
 */
 function bg_AddBeyondGrammarSettings($settings){
-    global $bg_optionGroup, $bg_opts_apiKey;
+    global $bg_optionGroup, $bg_opts_apiKey, $bg_version;
     
     $options = get_option($bg_optionGroup);
     $apiKey = '';
@@ -62,7 +63,7 @@ function bg_AddBeyondGrammarSettings($settings){
         'service' => array(
             'apiKey'=>$apiKey,
             'i18n'=>array(
-                'en'=>'https://prowriting.azureedge.net/beyondgrammar-tinymce/1.0.16/dist/i18n-en.js'
+                'en'=>"https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist/i18n-en.js"
             )
         )
     ));
@@ -74,7 +75,8 @@ function bg_AddBeyondGrammarSettings($settings){
 * Sets url to BeyondGrammar TinyMCE plugin
 */
 function bg_LoadBeyondGrammarMCEPlugin($plugin_array){
-    $plugin_array['BeyondGrammar'] = 'https://prowriting.azureedge.net/beyondgrammar-tinymce/1.0.16/dist/beyond-grammar-plugin.js';
+    global $bg_version;
+    $plugin_array['BeyondGrammar'] = "https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist/beyond-grammar-plugin.js";
     return $plugin_array;
 }
 
