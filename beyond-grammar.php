@@ -1,16 +1,11 @@
 <?php
 /*
    Plugin Name: BeyondGrammar for WordPress
-   Plugin URI:  http://www.prowritingaid.com
-   Description: More than just a spell/grammar check, Pro Writing Aid provides a thorough analysis of your writing to help you improve it. It highlights: sticky sentences; overused, vagues, and abstract words; repeated words and phrases, and more. Improve your writing easily in 5 minutes.
+   Plugin URI:  https://github.com/prowriting/beyondgrammar-wordpress
+   Description: Bring real-time spelling, grammar and style checking into your TinyMCE editor. Perfect for web CMSs, help desk systems and blogs
    Author:      @ProWritingAid
    Version:     0.1
-   Author URI:  http://www.prowritingaid.com
-*/
-
-/*
-menu_slug = 
-
+   Author URI:  https://github.com/prowriting/beyondgrammar-wordpress
 */
 
 $bg_menuSlug = "beyondgrammar";
@@ -19,37 +14,106 @@ $bg_optionName  = "beyondgrammar_options";
 $bg_sectionId   = "beyondgrammar_main";
 $bg_page = "beyondgrammar";
 
-$bg_opts_licenseCode = 'licenceCode_string'; //Do not touch yet
-$bg_input_licenceCode = "{$bg_optionName}[{$bg_opts_licenseCode}]";
+$bg_opts_apiKey = 'beyondgrammar_apiKey';
+$bg_input_apiKey = "{$bg_optionName}[{$bg_opts_apiKey}]";
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Entry Point  //////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function bg_startPlugin(){
+    add_action( 'init',       'bg_PatchEditor' );
     add_action( 'admin_init', 'bg_AddAdminSettings' );
-    add_action( 'admin_menu', 'bg_AddPluginMenu' );       
+    add_action( 'admin_menu', 'bg_AddPluginMenu' );
 }
 
-////////////
-///Settings
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Editor patches ////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+* Added filters related to configuring tinymce editor
+*/
+function bg_PatchEditor(){
+    // Don't bother doing this stuff if the current user lacks permissions and only in RichEditor mode
+    if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') && get_user_option('rich_editing') != 'true'){
+        return;
+    }
+    
+    add_filter('tiny_mce_before_init', 'bg_AddBeyondGrammarSettings' );
+    add_filter("tiny_mce_version", "bg_SetupTinyMCEPlugin" );
+    add_filter("mce_external_plugins", "bg_LoadBeyondGrammarMCEPlugin");
+    add_filter("mce_buttons", "bg_AddBeyondGrammarButton");
+}
+
+/**
+* Adding settings to the BeyondGrammar options
+*/
+function bg_AddBeyondGrammarSettings($settings){
+    global $bg_optionGroup, $bg_opts_apiKey;
+    
+    $options = get_option($bg_optionGroup);
+    $apiKey = '';
+    if (array_key_exists ($bg_opts_apiKey, $options)){
+        $apiKey = $options[$bg_opts_apiKey];
+    }
+    
+    $settings['bgOptions'] = wp_json_encode(array(
+        'service' => array(
+            'apiKey'=>$apiKey,
+            'i18n'=>array(
+                'en'=>'https://prowriting.azureedge.net/beyondgrammar-tinymce/1.0.16/dist/i18n-en.js'
+            )
+        )
+    ));
+    
+    return $settings;
+}
+
+/**
+* Sets url to BeyondGrammar TinyMCE plugin
+*/
+function bg_LoadBeyondGrammarMCEPlugin($plugin_array){
+    $plugin_array['BeyondGrammar'] = 'https://prowriting.azureedge.net/beyondgrammar-tinymce/1.0.16/dist/beyond-grammar-plugin.js';
+    return $plugin_array;
+}
+
+/**
+* Adds BeyondGrammar to TinyMCE plugin toolbar
+*/
+function bg_AddBeyondGrammarButton($buttons){
+    array_push($buttons, "separator", "BeyondGrammar");
+    return $buttons;
+}
+
+
+function bg_SetupTinyMCEPlugin($version) {
+    return $version+2;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Settings //////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
 * Register setting in WP core
 */
 function bg_AddAdminSettings(){
-    global $bg_optionGroup, $bg_optionName, $bg_page, $bg_sectionId, $bg_opts_licenseCode;
+    global $bg_optionGroup, $bg_optionName, $bg_page, $bg_sectionId, $bg_opts_apiKey;
     
     register_setting( $bg_optionGroup, $bg_optionName, 'bg_ValidateOptions' );
     add_settings_section($bg_sectionId, 'License Settings', 'bg_AddSettingsSectionHtml', $bg_page);	
-    add_settings_field($bg_opts_licenseCode, 'License Code', 'bg_AddLicenseCodeSettingsFieldHtml', $bg_page, $bg_sectionId);
+    add_settings_field($bg_opts_apiKey, 'Api Key', 'bg_AddApiKeySettingsFieldHtml', $bg_page, $bg_sectionId);
 }
 
 /**
 * Callback for validation option
 */
 function bg_ValidateOptions($input) {
-    global $bg_opts_licenseCode;
-    //{11111111-1111-1111-1111-111111111111}
-	$newinput[$bg_opts_licenseCode] = trim($input[$bg_opts_licenseCode]);
-	if(!preg_match('/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/', $newinput[$bg_opts_licenseCode])) {
-		$newinput[$bg_opts_licenseCode] = 'Invalid license code';
+    global $bg_opts_apiKey;
+	$newinput[$bg_opts_apiKey] = trim($input[$bg_opts_apiKey]);
+	if(!preg_match('/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/', $newinput[$bg_opts_apiKey])) {
+		$newinput[$bg_opts_apiKey] = 'Invalid Api Key';
 	}
 	return $newinput;
 }
@@ -60,22 +124,23 @@ function bg_ValidateOptions($input) {
 function bg_AddSettingsSectionHtml() { }
 
 /**
-* Returns html for input license code
+* Returns html for input api key
 */
-function bg_AddLicenseCodeSettingsFieldHtml() {
-    global $bg_optionGroup, $bg_opts_licenseCode, $bg_input_licenceCode, $bg_page;
+function bg_AddApiKeySettingsFieldHtml() {
+    global $bg_optionGroup, $bg_opts_apiKey, $bg_input_apiKey, $bg_page;
     
 	$options = get_option($bg_optionGroup);
-	$licenceCode = '';
-	if (array_key_exists ($bg_opts_licenseCode, $options)){
-		$licenceCode = $options[$bg_opts_licenseCode];
+	$apiKey = '';
+	if (array_key_exists ($bg_opts_apiKey, $options)){
+		$apiKey = $options[$bg_opts_apiKey];
 	}
 	
-	echo "<input id='${$bg_page}_{$bg_opts_licenseCode}' name='{$bg_input_licenceCode}' size='40' type='text' value='{$licenceCode}' />";
+	echo "<input id='${$bg_page}_{$bg_opts_apiKey}' name='{$bg_input_apiKey}' size='40' type='text' value='{$apiKey}' />";
 }
 
-////////////////
-//Plugin menu
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Plugin menu ///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
 * Add options page in WP core
@@ -89,7 +154,7 @@ function bg_AddPluginMenu() {
 * Return html for saving options in WP core
 */
 function bg_AddPluginMenuHtml() {
-    global $bg_opts_licenseCode, $bg_optionGroup, $bg_page;
+    global $bg_opts_apiKey, $bg_optionGroup, $bg_page;
 
 	if ( !current_user_can( 'manage_options' ) )  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
@@ -98,13 +163,13 @@ function bg_AddPluginMenuHtml() {
 	echo('<h2>BeyondGrammar Settings</h2>');
 		
 	echo('	<form action="options.php" method="post">');
-	settings_fields($bg_optionGroup); //?????
-	do_settings_sections($bg_page); //?????
+	settings_fields($bg_optionGroup);
+	do_settings_sections($bg_page);
 	echo("<input name='Submit' type='submit' class='button-primary' value='Save Changes' />");
 	echo('</form>');
 	echo '</div>';
 }
 
-
 bg_startPlugin();
+
 ?>
