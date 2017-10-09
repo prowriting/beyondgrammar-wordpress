@@ -74,6 +74,7 @@ function bg_AddBeyondGrammarSettings($settings){
     $settings['bgOptions'] = wp_json_encode(array(
         'service' => array(
             'apiKey'=>$apiKey,
+            'userId'=>get_current_user_id(),
             'i18n'=>$bg_lang_urls
         )
     ));
