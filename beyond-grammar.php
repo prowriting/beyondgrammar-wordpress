@@ -8,15 +8,27 @@
    Author URI:  https://github.com/prowriting/beyondgrammar-wordpress
 */
 
-$bg_menuSlug = "beyondgrammar";
-$bg_optionGroup = "beyondgrammar_options";
-$bg_optionName  = "beyondgrammar_options";
-$bg_sectionId   = "beyondgrammar_main";
-$bg_page = "beyondgrammar";
-
-$bg_opts_apiKey = 'beyondgrammar_apiKey';
+/**
+* Variables for WordPress settings page
+*/
+$bg_menuSlug     = "beyondgrammar";
+$bg_optionGroup  = "beyondgrammar_options";
+$bg_optionName   = "beyondgrammar_options";
+$bg_sectionId    = "beyondgrammar_main";
+$bg_page         = "beyondgrammar";
+$bg_opts_apiKey  = 'beyondgrammar_apiKey';
 $bg_input_apiKey = "{$bg_optionName}[{$bg_opts_apiKey}]";
-$bg_version = "1.0.18";
+
+/**
+* Variables for BeyondGrammar plugin. Version, url, i18n
+*/
+$bg_version = "1.0.19";
+//$bg_plugin_base_url = "http://localhost:8082";
+$bg_plugin_base_url = "https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist";
+$bg_plugin_url = "{$bg_plugin_base_url}/beyond-grammar-plugin.js";
+$bg_lang_urls = array(
+    "en" => "{$bg_plugin_base_url}/i18n-en.js"
+);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Entry Point  //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +63,7 @@ function bg_PatchEditor(){
 * Adding settings to the BeyondGrammar options
 */
 function bg_AddBeyondGrammarSettings($settings){
-    global $bg_optionGroup, $bg_opts_apiKey, $bg_version;
+    global $bg_optionGroup, $bg_opts_apiKey, $bg_version, $bg_lang_urls;
     
     $options = get_option($bg_optionGroup);
     $apiKey = '';
@@ -62,9 +74,7 @@ function bg_AddBeyondGrammarSettings($settings){
     $settings['bgOptions'] = wp_json_encode(array(
         'service' => array(
             'apiKey'=>$apiKey,
-            'i18n'=>array(
-                'en'=>"https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist/i18n-en.js"
-            )
+            'i18n'=>$bg_lang_urls
         )
     ));
     
@@ -75,8 +85,8 @@ function bg_AddBeyondGrammarSettings($settings){
 * Sets url to BeyondGrammar TinyMCE plugin
 */
 function bg_LoadBeyondGrammarMCEPlugin($plugin_array){
-    global $bg_version;
-    $plugin_array['BeyondGrammar'] = "https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist/beyond-grammar-plugin.js";
+    global $bg_plugin_url;
+    $plugin_array['BeyondGrammar'] = $bg_plugin_url;
     return $plugin_array;
 }
 
@@ -113,11 +123,11 @@ function bg_AddAdminSettings(){
 */
 function bg_ValidateOptions($input) {
     global $bg_opts_apiKey;
-	$newinput[$bg_opts_apiKey] = trim($input[$bg_opts_apiKey]);
-	if(!preg_match('/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/', $newinput[$bg_opts_apiKey])) {
-		$newinput[$bg_opts_apiKey] = 'Invalid Api Key';
+	$newInput[$bg_opts_apiKey] = trim($input[$bg_opts_apiKey]);
+	if(!preg_match('/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/', $newInput[$bg_opts_apiKey])) {
+		$newInput[$bg_opts_apiKey] = 'Invalid Api Key';
 	}
-	return $newinput;
+	return $newInput;
 }
 
 /**
