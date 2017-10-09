@@ -1,6 +1,9 @@
 # BeyondGrammar checking plugin for WordPress
 Bring real-time spelling, grammar and style checking into your WordPress editor. Perfect for web CMSs, help desk systems and blogs.
 
+## Download
+You can <a href="https://prowriting.azureedge.net/beyondgrammar-wordpress/master/beyond-grammar.zip" target="_blank">download</a> latest build from master 
+
 ## Why choose our plugin?
 Our state-of-the-art grammar checker is used by over 500,000 users. It contains many unique features that you won't find in other solutions. These include:
 
