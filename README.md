@@ -17,3 +17,23 @@ Our state-of-the-art grammar checker is used by over 500,000 users. It contains 
 
 ## Integration demo
 ### NOTE: You will need to <a href="http://prowritingaid.com" target="_blank">register</a> to get a API key first (FREE for Individuals)!
+
+## Install instructions
+
+First, you need to <a href="https://prowriting.azureedge.net/beyondgrammar-wordpress/master/beyond-grammar.zip" target="_blank">download the plugin</a> zip file. Next, you need to go to WordPress admin area and visit **Plugins » Add New page**.
+After that, click on the Upload Plugin button on top of the page.
+
+![Step 1](https://user-images.githubusercontent.com/466323/31487902-379b35c6-af66-11e7-88bf-3115e06fd0b9.png)
+
+This will bring you to the plugin upload page. Here you need to click on the choose file button and select the plugin file you downloaded earlier to your computer.
+
+![Step 2](https://user-images.githubusercontent.com/466323/31487906-39b2f740-af66-11e7-8e3e-92af9c3ae31b.png)
+
+After you have selected the file, you need to click on the install now button.
+WordPress will now upload the plugin file from your computer and install it for you. You will see a success message like this after installation is finished.
+
+![Step 3](https://user-images.githubusercontent.com/466323/31487909-3b482346-af66-11e7-911f-ef18fd8ebfef.png)
+
+Once installed, you need to click on the Activate Plugin link to start using the plugin.
+Then you just need to go to **Settings » BeyondGrammar** and enter your API key.
+Then you will have real-time grammar checking in the WordPress editor.
