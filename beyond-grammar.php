@@ -22,7 +22,7 @@ $bg_input_apiKey = "{$bg_optionName}[{$bg_opts_apiKey}]";
 /**
 * Variables for BeyondGrammar plugin. Version, url, i18n
 */
-$bg_version = "1.0.19";
+$bg_version = "1.0.22";
 //$bg_plugin_base_url = "http://localhost:8082";
 $bg_plugin_base_url = "https://prowriting.azureedge.net/beyondgrammar-tinymce/{$bg_version}/dist";
 $bg_plugin_url = "{$bg_plugin_base_url}/beyond-grammar-plugin.js";
@@ -70,11 +70,15 @@ function bg_AddBeyondGrammarSettings($settings){
     if (array_key_exists ($bg_opts_apiKey, $options)){
         $apiKey = $options[$bg_opts_apiKey];
     }
-    
+    //$user = wp_get_current_user();
+    $user_id = get_current_user_id();
+    if( $user_id == 0 ) {
+        $user_id = NULL;
+    }
     $settings['bgOptions'] = wp_json_encode(array(
         'service' => array(
             'apiKey'=>$apiKey,
-            'userId'=>get_current_user_id(),
+            'userId'=>$user_id,
             'i18n'=>$bg_lang_urls
         )
     ));
